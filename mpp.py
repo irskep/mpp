@@ -32,8 +32,9 @@ Put "#repeat n" above a line to repeat that line n times.
 Put curly braces around your code on their own lines to make all labels and aliases valid only within that scope.
 """
 
-import string, sys, re
+import string, sys, re, os
 
+path_prefix = ""
 global_macros = {}
 main_count = 0
 label_count = 0
@@ -53,7 +54,7 @@ def get_file_text(f1):
             arg = ' '.join(linesplit[1:])
             if arg not in included:
                 included.append(arg)
-                f3 = open(arg, 'r')
+                f3 = open(os.path.join(path_prefix, arg), 'r')
                 text = get_file_text(f3)
                 if not strip_comments:
                     text = '\n###'+arg+'###\n' + text + '\n###end '+arg+'###\n'
@@ -289,10 +290,12 @@ def process_lines(s, local_macros=dict(), toplevel=False):
         raise Exception, "Scoping Error"
 
 def process(path, out, cstrip=False):
-    global global_macros, strip_comments
+    global global_macros, strip_comments, path_prefix
     strip_comments = cstrip
     
     f1 = open(path, 'r')
+    path_prefix = os.path.dirname(path)
+    
     s = get_file_text(f1)
     s = process_lines(s, toplevel=True)
     
