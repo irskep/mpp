@@ -309,7 +309,10 @@ if __name__ == "__main__":
     #if called from the cl, process with default args
     try:
         infile = sys.argv[1]
-        outfile = sys.argv[2]
+        if len(sys.argv) > 2:
+            outfile = sys.argv[2]
+        else:
+            outfile = os.path.join(os.path.dirname(infile), 'out.s')
     except:
         raise Exception, "python mpp.py in_file out_file"
     

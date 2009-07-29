@@ -1,3 +1,5 @@
+#'./mpp.py test/test1.s'
+
 #include includeme.s
 
 
