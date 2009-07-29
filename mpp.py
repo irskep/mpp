@@ -63,8 +63,6 @@ def get_file_text(f1):
             in_lines.append(line)
     return ''.join(in_lines)
 
-#if specified, rename all the labels so they don't conflict with
-#tim&steve's kernel labels
 def substitute_labels(s):
     global main_count, label_count
     line_list = s.split('\n')
@@ -100,7 +98,7 @@ def substitute_labels(s):
         s = r.sub(new, s)
     return s
 
-def rep_line(line, local_macros):
+def rep_line(line, local_macros, varnames=[]):
     #process macros
     global global_macros
     out_lines = []
@@ -125,6 +123,11 @@ def rep_line(line, local_macros):
                 while arg_num > 0:
                     #replace expression with argument
                     mtext = mtext.replace("%"+str(arg_num), arg_list[arg_num-1])
+                    if varnames:
+                        for this_scope in reversed(varnames):
+                            for k, v in this_scope.items():
+                                this_var = re.compile(r'(\s%s[\s$])' % k)
+                                mtext = this_var.sub(' %s' % v, mtext)
                     arg_num -= 1
             mtext = substitute_labels(mtext)
             #append macro text (possibly transformed) to output
@@ -229,8 +232,6 @@ def process_lines(s, local_macros=dict(), toplevel=False):
             lines = substitute_labels('\n'.join(l)).split('\n')
             lines = rep_names(lines, names)
             scopes[-1].extend(lines)
-            #print lines
-            #print scopes[-1][-3:]
         elif kw.startswith('@'): #variable name
             name = var_split.split(line.lstrip().rstrip())
             if len(name) != 2: raise Exception, 'Syntax Error in variable name line = \n' + line
@@ -268,7 +269,7 @@ def process_lines(s, local_macros=dict(), toplevel=False):
                     #+= rep_line(line, local_macros)
             else:
                 #check for regular ol' macro
-                scopes[-1] += rep_line(line, local_macros) * repetitions
+                scopes[-1] += rep_line(line, local_macros, varnames) * repetitions
                 repetitions = 1
     if len(scopes) == 1 and len(varnames) == 1:
         lines = rep_names(scopes[0], varnames[0])
@@ -287,14 +288,12 @@ def process_lines(s, local_macros=dict(), toplevel=False):
     else:
         raise Exception, "Scoping Error"
 
-def process(path, out, replace_labels=False, cstrip=False):
+def process(path, out, cstrip=False):
     global global_macros, strip_comments
     strip_comments = cstrip
     
     f1 = open(path, 'r')
     s = get_file_text(f1)
-    if replace_labels:
-        s = substitute_labels(s)
     s = process_lines(s, toplevel=True)
     
     f1.close()
@@ -309,6 +308,6 @@ if __name__ == "__main__":
         infile = sys.argv[1]
         outfile = sys.argv[2]
     except:
-        raise Exception, "use 'python mpp.py in_file out_file"
+        raise Exception, "python mpp.py in_file out_file"
     
     process(infile, outfile)
