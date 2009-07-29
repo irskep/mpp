@@ -2,7 +2,7 @@
 = Disclaimer =
 ==============
 
-MPP was written during the development of a project for a class, so its internal design is suboptimal. Some errors result in an opaque Python stack trace. Some corner cases are not handled.
+mpp was written during the development of a project for a class, so its internal design is suboptimal. Some errors result in an opaque Python stack trace. Some corner cases are not handled.
 
 If you come across one of these nasty errors, feel free to email one of us (srj15@case.edu, tim.tadh@gmail.com) or send us a message on Github (irskep, timtadh).
 
@@ -30,6 +30,8 @@ Since some MIPS simulators don't support macros, MPP includes its own macro engi
 #end
 
 Parameters are referenced within macros with %1, %2, etc, which represent the positional arguments. Macros can be called recursively.
+
+To make a macro visible outside of the file it is included from, add 'global' to the #define line.
 
 ==Aliases==
 
